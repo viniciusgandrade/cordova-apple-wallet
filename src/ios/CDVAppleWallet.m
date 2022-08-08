@@ -176,7 +176,7 @@ typedef void (^completedPaymentProcessHandler)(PKAddPaymentPassRequest *request)
 }
 
 // Plugin Method - check paired devices
-- (void) checkPairedDevices:(CDVInvokedUrlCommand *)command 
+- (void) checkPairedDevices:(CDVInvokedUrlCommand *)command
 {
     NSMutableDictionary* dictionary = [[NSMutableDictionary alloc] init];
     if (WCSession.isSupported) { // check if the device support to handle an Apple Watch
@@ -198,7 +198,7 @@ typedef void (^completedPaymentProcessHandler)(PKAddPaymentPassRequest *request)
 }
 
 // Plugin Method - check paired devices By Suffix
-- (void) checkPairedDevicesBySuffix:(CDVInvokedUrlCommand *)command 
+- (void) checkPairedDevicesBySuffix:(CDVInvokedUrlCommand *)command
 {
     NSString * suffix = [command.arguments objectAtIndex:0];
     NSMutableDictionary* dictionary = [[NSMutableDictionary alloc] init];
@@ -208,20 +208,40 @@ typedef void (^completedPaymentProcessHandler)(PKAddPaymentPassRequest *request)
     PKPassLibrary *passLib = [[PKPassLibrary alloc] init];
 
     // find if credit/debit card is exist in any pass container e.g. iPad
-    for (PKPaymentPass *pass in [passLib passesOfType:PKPassTypePayment]){
-        if ([pass.primaryAccountNumberSuffix isEqualToString:suffix]) {
-            [dictionary setObject:@"True" forKey:@"isInWallet"];
-            [dictionary setObject:pass.primaryAccountIdentifier forKey:@"FPANID"];
-            break;
+    if (@available(iOS 13.4, *)) {
+        for (PKSecureElementPass *pass in [passLib passesOfType:PKPassTypeSecureElement]){
+            if ([pass.primaryAccountNumberSuffix isEqualToString:suffix]) {
+                [dictionary setObject:@"True" forKey:@"isInWallet"];
+                [dictionary setObject:pass.primaryAccountIdentifier forKey:@"FPANID"];
+                break;
+            }
+        }
+    } else {
+        for (PKPaymentPass *pass in [passLib passesOfType:PKPassTypePayment]){
+            if ([pass.primaryAccountNumberSuffix isEqualToString:suffix]) {
+                [dictionary setObject:@"True" forKey:@"isInWallet"];
+                [dictionary setObject:pass.primaryAccountIdentifier forKey:@"FPANID"];
+                break;
+            }
         }
     }
     
     // find if credit/debit card is exist in any remote pass container e.g. iWatch
-    for (PKPaymentPass *remotePass in [passLib remotePaymentPasses]){
-        if([remotePass.primaryAccountNumberSuffix isEqualToString:suffix]){
-            [dictionary setObject:@"True" forKey:@"isInWatch"];
-            [dictionary setObject:remotePass.primaryAccountIdentifier forKey:@"FPANID"];
-            break;
+    if (@available(iOS 13.4, *)) {
+        for (PKSecureElementPass *remotePass in [passLib remoteSecureElementPasses]){
+            if([remotePass.primaryAccountNumberSuffix isEqualToString:suffix]){
+                [dictionary setObject:@"True" forKey:@"isInWatch"];
+                [dictionary setObject:remotePass.primaryAccountIdentifier forKey:@"FPANID"];
+                break;
+            }
+        }
+    } else {
+        for (PKPaymentPass *remotePass in [passLib remotePaymentPasses]){
+            if([remotePass.primaryAccountNumberSuffix isEqualToString:suffix]){
+                [dictionary setObject:@"True" forKey:@"isInWatch"];
+                [dictionary setObject:remotePass.primaryAccountIdentifier forKey:@"FPANID"];
+                break;
+            }
         }
     }
     
@@ -451,7 +471,7 @@ typedef void (^completedPaymentProcessHandler)(PKAddPaymentPassRequest *request)
 
 @end
 
-// in this case, it is handling if it found 2 watches (more than 1 remote device) 
+// in this case, it is handling if it found 2 watches (more than 1 remote device)
 // means if the credit/debit card is exist on more than 1 remote devices, iPad, iWatch etc
 
 // -(void)eligibilityAddingToWallet2:(CDVInvokedUrlCommand*)command{
