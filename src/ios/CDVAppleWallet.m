@@ -253,24 +253,48 @@ typedef void (^completedPaymentProcessHandler)(PKAddPaymentPassRequest *request)
 - (NSString *) getCardFPAN:(NSString *) cardSuffix{
     
     PKPassLibrary *passLibrary = [[PKPassLibrary alloc] init];
-    NSArray<PKPass *> *paymentPasses = [passLibrary passesOfType:PKPassTypePayment];
-    for (PKPass *pass in paymentPasses) {
-        PKPaymentPass * paymentPass = [pass paymentPass];
-        if([[paymentPass primaryAccountNumberSuffix] isEqualToString:cardSuffix])
-            return [paymentPass primaryAccountIdentifier];
-    }
-    
-    if (WCSession.isSupported) { // check if the device support to handle an Apple Watch
-        WCSession *session = [WCSession defaultSession];
-        [session setDelegate:self.appDelegate];
-        [session activateSession];
+    if (@available(iOS 13.4, *)) {
+        NSArray<PKPass *> *paymentPasses = [passLibrary passesOfType:PKPassTypeSecureElement];
+        for (PKPass *pass in paymentPasses) {
+            PKPaymentPass * paymentPass = [pass paymentPass];
+            if([[paymentPass primaryAccountNumberSuffix] isEqualToString:cardSuffix])
+                return [paymentPass primaryAccountIdentifier];
+        }
         
-        if ([session isPaired]) { // Check if the iPhone is paired with the Apple Watch
-            paymentPasses = [passLibrary remotePaymentPasses];
-            for (PKPass *pass in paymentPasses) {
-                PKPaymentPass * paymentPass = [pass paymentPass];
-                if([[paymentPass primaryAccountNumberSuffix] isEqualToString:cardSuffix])
-                    return [paymentPass primaryAccountIdentifier];
+        if (WCSession.isSupported) { // check if the device support to handle an Apple Watch
+            WCSession *session = [WCSession defaultSession];
+            [session setDelegate:self.appDelegate];
+            [session activateSession];
+            
+            if ([session isPaired]) { // Check if the iPhone is paired with the Apple Watch
+                paymentPasses = [passLibrary remoteSecureElementPasses];
+                for (PKPass *pass in paymentPasses) {
+                    PKPaymentPass * paymentPass = [pass paymentPass];
+                    if([[paymentPass primaryAccountNumberSuffix] isEqualToString:cardSuffix])
+                        return [paymentPass primaryAccountIdentifier];
+                }
+            }
+        }
+    } else {
+        NSArray<PKPass *> *paymentPasses = [passLibrary passesOfType:PKPassTypePayment];
+        for (PKPass *pass in paymentPasses) {
+            PKPaymentPass * paymentPass = [pass paymentPass];
+            if([[paymentPass primaryAccountNumberSuffix] isEqualToString:cardSuffix])
+                return [paymentPass primaryAccountIdentifier];
+        }
+        
+        if (WCSession.isSupported) { // check if the device support to handle an Apple Watch
+            WCSession *session = [WCSession defaultSession];
+            [session setDelegate:self.appDelegate];
+            [session activateSession];
+            
+            if ([session isPaired]) { // Check if the iPhone is paired with the Apple Watch
+                paymentPasses = [passLibrary remotePaymentPasses];
+                for (PKPass *pass in paymentPasses) {
+                    PKPaymentPass * paymentPass = [pass paymentPass];
+                    if([[paymentPass primaryAccountNumberSuffix] isEqualToString:cardSuffix])
+                        return [paymentPass primaryAccountIdentifier];
+                }
             }
         }
     }
@@ -322,7 +346,7 @@ typedef void (^completedPaymentProcessHandler)(PKAddPaymentPassRequest *request)
         configuration.localizedDescription = [options objectForKey:@"localizedDescription"];
         
         // Filters the device and attached devices that already have this card provisioned. No filter is applied if the parameter is omitted
-        configuration.primaryAccountIdentifier = [self getCardFPAN:configuration.primaryAccountSuffix]; //@"V-3018253329239943005544";//@"";
+        configuration.primaryAccountIdentifier = [options objectForKey:@"primaryAccountIdentifier"]; //@"V-3018253329239943005544";//@"";
         
         
         // Filters the networks shown in the introduction view to this single network.
