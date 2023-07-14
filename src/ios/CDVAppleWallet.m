@@ -454,6 +454,12 @@ typedef void (^completedPaymentProcessHandler)(PKAddPaymentPassRequest *request)
     
     // CDVPluginResult* pluginResult;
     NSArray* arguments = command.arguments;
+    if (arguments == nil) {
+        commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"error"];
+        [commandResult setKeepCallback:[NSNumber numberWithBool:YES]];
+        [self.commandDelegate sendPluginResult:commandResult callbackId:self.completionCallbackId];
+        return;
+    }
     if ([arguments count] != 1){
         // pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"incorrect number of arguments"];
         // [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
