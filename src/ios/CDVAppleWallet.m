@@ -215,7 +215,11 @@ typedef void (^completedPaymentProcessHandler)(PKAddPaymentPassRequest *request)
             if ([pass.primaryAccountNumberSuffix isEqualToString:suffix]) {
                 [dictionary setObject:@"True" forKey:@"isInWallet"];
                 [dictionary setObject:pass.primaryAccountIdentifier forKey:@"FPANID"];
-                [dictionary setObject:pass.deviceAccountIdentifier forKey:@"walletDeviceId"];
+                if (pass.deviceAccountIdentifier) {
+                    [dictionary setObject:pass.deviceAccountIdentifier forKey:@"walletDeviceId"];
+                } else {
+                    [dictionary setObject:[NSNull null] forKey:@"walletDeviceId"];
+                }
                 break;
             }
         }
@@ -224,7 +228,11 @@ typedef void (^completedPaymentProcessHandler)(PKAddPaymentPassRequest *request)
             if ([pass.primaryAccountNumberSuffix isEqualToString:suffix]) {
                 [dictionary setObject:@"True" forKey:@"isInWallet"];
                 [dictionary setObject:pass.primaryAccountIdentifier forKey:@"FPANID"];
-                [dictionary setObject:pass.deviceAccountIdentifier forKey:@"walletDeviceId"];
+                if (pass.deviceAccountIdentifier) {
+                    [dictionary setObject:pass.deviceAccountIdentifier forKey:@"walletDeviceId"];
+                } else {
+                    [dictionary setObject:[NSNull null] forKey:@"walletDeviceId"];
+                }
                 break;
             }
         }
@@ -236,7 +244,11 @@ typedef void (^completedPaymentProcessHandler)(PKAddPaymentPassRequest *request)
             if([remotePass.primaryAccountNumberSuffix isEqualToString:suffix]){
                 [dictionary setObject:@"True" forKey:@"isInWatch"];
                 [dictionary setObject:remotePass.primaryAccountIdentifier forKey:@"FPANID"];
-                [dictionary setObject:remotePass.deviceAccountIdentifier forKey:@"walletWatchId"];
+                if (remotePass.deviceAccountIdentifier) {
+                    [dictionary setObject:remotePass.deviceAccountIdentifier forKey:@"walletWatchId"];
+                } else {
+                    [dictionary setObject:[NSNull null] forKey:@"walletWatchId"];
+                }
                 break;
             }
         }
@@ -245,7 +257,11 @@ typedef void (^completedPaymentProcessHandler)(PKAddPaymentPassRequest *request)
             if([remotePass.primaryAccountNumberSuffix isEqualToString:suffix]){
                 [dictionary setObject:@"True" forKey:@"isInWatch"];
                 [dictionary setObject:remotePass.primaryAccountIdentifier forKey:@"FPANID"];
-                [dictionary setObject:remotePass.deviceAccountIdentifier forKey:@"walletWatchId"];
+                if (remotePass.deviceAccountIdentifier) {
+                    [dictionary setObject:remotePass.deviceAccountIdentifier forKey:@"walletWatchId"];
+                } else {
+                    [dictionary setObject:[NSNull null] forKey:@"walletWatchId"];
+                }
                 break;
             }
         }
